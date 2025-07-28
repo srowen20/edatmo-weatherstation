@@ -15,10 +15,10 @@ read_davis_iot <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
     as.Date(c(m[1,2], m[1,3]), "%Y%m%d")
   }
   ranges <- lapply(files, get_range)
-  selected <- sapply(ranges, function(r) between(r[1], start_date, end_date) | between(r[2], start_date, end_date)) 
+  selected <- sapply(ranges, function(r) between(r[1], start_date - 2, end_date) | between(r[2], start_date - 2, end_date)) 
   files_sel <- files[selected]
   
-  if(length(files_sel) == 0) return(NULL)
+  if (length(files_sel) == 0) return(NULL)
   data_list <- lapply(files_sel, function(f) {
     df <- read.csv(f)
     df$timestamp <- as.POSIXct(df$timestamp, tz = "UTC")
@@ -36,9 +36,6 @@ read_davis_iot <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
     values_to = "value"
   )
 }
-
-library(jsonlite)
-library(dplyr)
 
 # Helper: turn a .dat line into a named list (works for Davis_yyyymmdd_HH.dat format)
 format_line <- function(line_) {
@@ -68,7 +65,6 @@ file_to_df <- function(file_) {
   return(lines_df)
 }
 
-
 read_davis_weewx <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
   base_dir <- file.path(DATA_ROOT_DIR, "RAW/by-serial/davis_weewx", serial, "raw_loop")
   files <- list.files(base_dir, pattern = "^Davis_\\d{8}_\\d{2}\\.dat$", full.names = TRUE)
@@ -76,10 +72,10 @@ read_davis_weewx <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
   get_datetime <- function(f) {
     m <- str_match(basename(f), "Davis_(\\d{8})_(\\d{2})\\.dat")
     if (is.na(m[1,1])) return(NULL)
-    as.POSIXct(paste0(m[1,2], m[1,3]), format="%Y%m%d%H", tz="UTC")
+    as.POSIXct(paste0(m[1,2], m[1,3]), format = "%Y%m%d%H", tz = "UTC")
   }
-  file_datetimes <- lapply(files, get_datetime)
-  selected <- between(as.POSIXct(unlist(file_datetimes), tz = "UTC"), start_date, end_date)
+  file_datetimes <- as.POSIXct(unlist(lapply(files, get_datetime)), tz = "UTC")
+  selected <- between(file_datetimes, start_date, end_date + 1)
   # Select those files overlapping with the interval (liberal: include any overlap in hours)
   files_sel <- files[selected]
   
@@ -104,14 +100,14 @@ parse_wxt_serial_file <- function(filename) {
   
   parse_line <- function(line) {
     parts <- strsplit(line, ";\\s*|,")[[1]]
-    if(length(parts) < 2) return(NULL)
+    if (length(parts) < 2) return(NULL)
     time_str <- parts[1]
     # Calculate full timestamp
     full_timestamp <- strptime(paste0(as.Date(file_datetime), time_str), format = "%Y-%m-%d%H%M%S", tz = "UTC")
-    if(lubridate::hour(full_timestamp) != lubridate::hour(file_datetime)) return(NULL)
+    if (lubridate::hour(full_timestamp) != lubridate::hour(file_datetime)) return(NULL)
     
     # Extract relevant data
-    data <- str_extract_all(paste(parts[-1], collapse=","), "(Dn|Dm|Dx|Ta|Tp|Ua|Pa|Sn|Sm|Sx|Ri)=-?\\d+\\.?\\d*")
+    data <- str_extract_all(paste(parts[-1], collapse = ","), "(Dn|Dm|Dx|Ta|Tp|Ua|Pa|Sn|Sm|Sx|Ri)=-?\\d+\\.?\\d*")
     
     data <- unlist(data)
     
@@ -130,19 +126,18 @@ parse_wxt_serial_file <- function(filename) {
 
 read_wxt536_serial <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
   base_dir <- file.path(DATA_ROOT_DIR, "RAW/by-serial/WXT536", serial)
-  files <- list.files(base_dir, pattern="^WXT536_.*_\\d{8}_\\d{2}\\.dat$", full.names=TRUE)
+  files <- list.files(base_dir, pattern = "^WXT536_.*_\\d{8}_\\d{2}\\.dat$", full.names = TRUE)
   # Pattern: WXT536_<serial>_YYYYMMDD_HH.dat
   get_datetime <- function(f) {
     m <- str_match(basename(f), "WXT536_.*_(\\d{8})_(\\d{2})\\.dat")
     if (is.na(m[1,1])) return(NULL)
-    as.POSIXct(paste0(m[1,2], m[1,3]), format="%Y%m%d%H", tz="UTC")
+    as.POSIXct(paste0(m[1,2], m[1,3]), format = "%Y%m%d%H", tz = "UTC")
   }
-  file_datetimes <- lapply(files, get_datetime)
-  files_sel <- files[sapply(file_datetimes, function(dt) {
-    !is.null(dt) && dt < (end_date + hours(1)) && dt >= floor_date(start_date, "hour")
-  })]
-  
-  if(length(files_sel) == 0) return(NULL)
+  file_datetimes <- as.POSIXct(unlist(lapply(files, get_datetime)), tz = "UTC")
+  selected <- between(file_datetimes, start_date, end_date)
+  files_sel <- files[selected]
+
+    if (length(files_sel) == 0) return(NULL)
   
   all_data <- purrr::map_dfr(files_sel, parse_wxt_serial_file)
   all_data <- all_data %>% filter(Timestamp >= start_date & Timestamp <= end_date)
@@ -157,25 +152,26 @@ read_wxt536_serial <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
 
 read_WXT536_jcmb <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
   base_dir <- file.path(DATA_ROOT_DIR, "RAW/by-serial/WXT536", serial, "weatherstation")
-  files <- list.files(base_dir, pattern="_minute_data\\.csv$", full.names = TRUE)
+  files <- list.files(base_dir, pattern = "_minute_data\\.csv$", full.names = TRUE)
   get_file_date <- function(f) {
     m <- str_match(basename(f), "^(\\d{4}-\\d{2}-\\d{2})_minute_data\\.csv$")
     if (is.na(m[1,1])) return(NULL)
     as.Date(m[1,2])
   }
-  file_dates <- lapply(files, get_file_date)
-  files_sel <- files[sapply(file_dates, function(d) {
-    !is.null(d) && d >= as.Date(start_date) && d <= as.Date(end_date)
-  })]
+  browser() # hereiam - check all date reads are good. don't write parts of a day. 
+  file_dates <- as.Date(unlist(lapply(files, get_file_date)))
+  selected <- between(file_dates, start_date, end_date)
+  files_sel <- files[selected]
   
-  if(length(files_sel) == 0) return(NULL)
+  if (length(files_sel) == 0) return(NULL)
   data_list <- lapply(files_sel, function(f) {
-    df <- read.csv(f, skip=2, header=FALSE)
-    col_names <- read.csv(f, nrows=1, header=TRUE)
+    df <- read.csv(f, skip = 2, header = FALSE)
+    col_names <- read.csv(f, nrows = 1, header = TRUE)
     colnames(df) <- colnames(col_names)
     df$Date.Time <- as.POSIXct(df$Date.Time)
     df
   })
+  browser()
   data <- bind_rows(data_list) %>% filter(Date.Time >= start_date & Date.Time <= end_date)
   pivot_longer(
     data,

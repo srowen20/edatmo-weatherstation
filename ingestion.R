@@ -8,7 +8,7 @@ standardise_station <- function(station_meta_entry, DATA_ROOT_DIR, serial, start
   }
 }
 
-# Aggregation (adjust wind code as needed for your context)
+# Aggregation (todfo: vector wind agg)
 agg_time <- function(df) {
   
   df %>%
