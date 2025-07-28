@@ -158,7 +158,6 @@ read_WXT536_jcmb <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
     if (is.na(m[1,1])) return(NULL)
     as.Date(m[1,2])
   }
-  browser() # hereiam - check all date reads are good. don't write parts of a day. 
   file_dates <- as.Date(unlist(lapply(files, get_file_date)))
   selected <- between(file_dates, start_date, end_date)
   files_sel <- files[selected]
