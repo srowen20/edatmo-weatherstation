@@ -1,5 +1,5 @@
 # read_functions.R
-
+library(purrr)
 # Each function accepts DIR, serial, start_date, end_date, file_pattern_strings
 # Date inputs: POSIXct or Date
 
