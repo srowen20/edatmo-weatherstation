@@ -1,10 +1,10 @@
 # read_functions.R
 
-# Each function accepts DIR, serial, start_date, end_date
+# Each function accepts DIR, serial, start_date, end_date, file_pattern_strings
 # Date inputs: POSIXct or Date
 
-
-read_davis_iot <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
+read_davis_iot <- function(DATA_ROOT_DIR, serial, start_date, end_date, file_pattern_strings) {
+  
   base_dir <- file.path(DATA_ROOT_DIR, "RAW/by-serial/davis-elastic", serial)
   files <- list.files(base_dir, pattern = "\\.csv$", full.names = TRUE)
   
@@ -15,7 +15,7 @@ read_davis_iot <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
     as.Date(c(m[1,2], m[1,3]), "%Y%m%d")
   }
   ranges <- lapply(files, get_range)
-  selected <- sapply(ranges, function(r) between(r[1], start_date - 2, end_date) | between(r[2], start_date - 2, end_date)) 
+  selected <- sapply(ranges, function(r) between(r[1], start_date - 3, end_date + 1) | between(r[2], start_date - 3, end_date + 1)) 
   files_sel <- files[selected]
   
   if (length(files_sel) == 0) return(NULL)
@@ -65,7 +65,7 @@ file_to_df <- function(file_) {
   return(lines_df)
 }
 
-read_davis_weewx <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
+read_davis_weewx <- function(DATA_ROOT_DIR, serial, start_date, end_date, file_pattern_strings) {
   base_dir <- file.path(DATA_ROOT_DIR, "RAW/by-serial/davis_weewx", serial, "raw_loop")
   files <- list.files(base_dir, pattern = "^Davis_\\d{8}_\\d{2}\\.dat$", full.names = TRUE)
   # Pattern: Davis_YYYYMMDD_HH.dat
@@ -83,15 +83,17 @@ read_davis_weewx <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
   
   lines_df_list <- lapply(files_sel, file_to_df)
   dat_df <- dplyr::bind_rows(lines_df_list) %>%
-    dplyr::mutate(time = as.POSIXct(as.integer(dateTime), origin="1970-01-01", tz="UTC"))
-  dat_df <- dat_df %>% filter(time >= start_date & time <= end_date)
-  
+    dplyr::mutate(time = as.POSIXct(as.integer(dateTime), origin = "1970-01-01", tz="UTC"))
+  dat_df$windDir[dplyr::between(as.numeric(dat_df$windDir), 359, 360)] <- NA
+  # mmhg -> hPa
+  dat_df$pressure <- as.character(as.numeric(dat_df$pressure) * 133.32)
   pivot_longer(
     dat_df,
     cols = -time,
     names_to = "variable",
     values_to = "value"
-  ) %>% rename(timestamp = time)
+  ) %>% rename(timestamp = time) %>%
+    dplyr::mutate(value = as.numeric(value))
 }
 
 parse_wxt_serial_file <- function(filename) {
@@ -124,7 +126,7 @@ parse_wxt_serial_file <- function(filename) {
   map_dfr(lines, parse_line)
 }
 
-read_wxt536_serial <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
+read_wxt536_serial <- function(DATA_ROOT_DIR, serial, start_date, end_date, file_pattern_strings) {
   base_dir <- file.path(DATA_ROOT_DIR, "RAW/by-serial/WXT536", serial)
   files <- list.files(base_dir, pattern = "^WXT536_.*_\\d{8}_\\d{2}\\.dat$", full.names = TRUE)
   # Pattern: WXT536_<serial>_YYYYMMDD_HH.dat
@@ -136,8 +138,8 @@ read_wxt536_serial <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
   file_datetimes <- as.POSIXct(unlist(lapply(files, get_datetime)), tz = "UTC")
   selected <- between(file_datetimes, start_date, end_date)
   files_sel <- files[selected]
-
-    if (length(files_sel) == 0) return(NULL)
+  
+  if (length(files_sel) == 0) return(NULL)
   
   all_data <- purrr::map_dfr(files_sel, parse_wxt_serial_file)
   all_data <- all_data %>% filter(Timestamp >= start_date & Timestamp <= end_date)
@@ -150,7 +152,7 @@ read_wxt536_serial <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
 }
 
 
-read_WXT536_jcmb <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
+read_WXT536_jcmb <- function(DATA_ROOT_DIR, serial, start_date, end_date, file_pattern_strings) {
   base_dir <- file.path(DATA_ROOT_DIR, "RAW/by-serial/WXT536", serial, "weatherstation")
   files <- list.files(base_dir, pattern = "_minute_data\\.csv$", full.names = TRUE)
   get_file_date <- function(f) {
@@ -167,11 +169,11 @@ read_WXT536_jcmb <- function(DATA_ROOT_DIR, serial, start_date, end_date) {
     df <- read.csv(f, skip = 2, header = FALSE)
     col_names <- read.csv(f, nrows = 1, header = TRUE)
     colnames(df) <- colnames(col_names)
-    df$Date.Time <- as.POSIXct(df$Date.Time)
+    df$Date.Time <- as.POSIXct(df$Date.Time, tz = "UTC")
     df
   })
-  browser()
-  data <- bind_rows(data_list) %>% filter(Date.Time >= start_date & Date.Time <= end_date)
+  
+  data <- bind_rows(data_list)
   pivot_longer(
     data,
     cols = -Date.Time,

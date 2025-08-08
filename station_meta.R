@@ -21,8 +21,8 @@ station_meta <- list(
       "outTemp" = "Tair (degC)", 
       "pressure" = "press (hPa)",
       "rainRate" = "rain (mm h-1)",            
-      "avgWindDir" = "wdir (deg)",
-      "avgWindSpeed" = "ws (m s-1)"
+      "windDir" = "wdir (deg)",
+      "windSpeed" = "ws (m s-1)"
     )
   ),
   "wxt536_serial" = list(

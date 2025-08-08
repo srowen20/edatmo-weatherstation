@@ -1,6 +1,7 @@
 # qc.R
 
 library(yaml)
+
 qc_limits <- yaml::read_yaml("qc_config.yml")
 simple_qc <- function(df, qc_limits) {
   df %>%

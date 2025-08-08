@@ -14,18 +14,21 @@ source("qc.R")
 DATA_ROOT_DIR = "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
 qc_limits <- yaml::read_yaml("qc_config.yml")
 
+# todo: add flexible file_pattern_strings list for each e.g. 
+# "RAW/by-castle_no_sn/davis_weewx/{castle_no_sn}/raw_loop/Davis_%Y%m%d_??.dat"
+# currently placeholder
 # Define your list of instruments and their serial numbers
 instruments <- list(
-  list(type = "davis_weewx", serial = "castle_no_sn"),
-    list(type = "davis_iot", serial = "jcmb-weather-01"),
-  list(type = "wxt536_serial", serial = "S0230710"),
-  list(type = "wxt536_jcmb", serial = "1540027")
+  list(type = "davis_weewx", serial = "castle_no_sn", file_pattern_strings = NA),
+  list(type = "wxt536_jcmb", serial = "1540027", file_pattern_strings = NA),
+  list(type = "davis_iot", serial = "jcmb-weather-01", file_pattern_strings = NA),
+  list(type = "wxt536_serial", serial = "S0230710", file_pattern_strings = NA)
   # Add more as needed
 )
 
 # Define the period of interest
-start_date <- as.Date("2025-05-09")
-end_date   <- as.Date("2025-05-10")
+start_date <- as.Date("2025-05-08")
+end_date  <- as.Date("2025-05-09")
 
 for (inst in instruments) {
   inst_name <- inst$type
@@ -42,7 +45,7 @@ for (inst in instruments) {
   if (is.null(dat)) next
   
   # Aggregate data (adjust time window if needed)
-  dat_agg <- agg_time(dat)
+  dat_agg <- agg_time(dat, start_date, end_date)
   
   # Apply quality control
   dat_qc <- simple_qc(dat_agg, qc_limits)
@@ -52,6 +55,7 @@ for (inst in instruments) {
   day_list <- split(dat_qc, dat_qc$day)
   for (day in names(day_list)) {
     day_data <- day_list[[day]]
+    if(nrow(day_data) < 10) next
     out_dir <- file.path("OUTPUT", inst_name, serial)
     dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
     out_file <- file.path(out_dir, paste0(as.character(day), ".csv"))
