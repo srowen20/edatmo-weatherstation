@@ -15,7 +15,7 @@ read_davis_iot <- function(DATA_ROOT_DIR, serial, start_date, end_date, file_pat
     as.Date(c(m[1,2], m[1,3]), "%Y%m%d")
   }
   ranges <- lapply(files, get_range)
-  selected <- sapply(ranges, function(r) between(r[1], start_date - 3, end_date + 1) | between(r[2], start_date - 3, end_date + 1)) 
+  selected <- sapply(ranges, function(r) between(r[1], start_date, end_date) | between(r[2], start_date, end_date)) 
   files_sel <- files[selected]
   
   if (length(files_sel) == 0) return(NULL)
@@ -75,7 +75,7 @@ read_davis_weewx <- function(DATA_ROOT_DIR, serial, start_date, end_date, file_p
     as.POSIXct(paste0(m[1,2], m[1,3]), format = "%Y%m%d%H", tz = "UTC")
   }
   file_datetimes <- as.POSIXct(unlist(lapply(files, get_datetime)), tz = "UTC")
-  selected <- between(file_datetimes, start_date, end_date + 1)
+  selected <- between(file_datetimes, start_date, end_date)
   # Select those files overlapping with the interval (liberal: include any overlap in hours)
   files_sel <- files[selected]
   
@@ -165,15 +165,23 @@ read_WXT536_jcmb <- function(DATA_ROOT_DIR, serial, start_date, end_date, file_p
   files_sel <- files[selected]
   
   if (length(files_sel) == 0) return(NULL)
-  data_list <- lapply(files_sel, function(f) {
-    df <- read.csv(f, skip = 2, header = FALSE)
-    col_names <- read.csv(f, nrows = 1, header = TRUE)
-    colnames(df) <- colnames(col_names)
-    df$Date.Time <- as.POSIXct(df$Date.Time, tz = "UTC")
-    df
-  })
-  
+  data_list <- list()
+  for (i in seq_along(files_sel)) {
+    f <- files_sel[[i]]
+    result <- tryCatch({
+      df <- read.csv(f, skip = 2, header = FALSE)
+      col_names <- read.csv(f, nrows = 1, header = TRUE)
+      colnames(df) <- colnames(col_names)
+      df$Date.Time <- as.POSIXct(df$Date.Time, tz = "UTC")
+      df
+    }, error = function(e) {
+      message(sprintf("Error reading file %s: %s", f, e$message))
+      NULL
+    })
+    data_list[[i]] <- result
+  }
   data <- bind_rows(data_list)
+  if (nrow(data) == 0 || is.null(data)) return(NULL)
   pivot_longer(
     data,
     cols = -Date.Time,
