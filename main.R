@@ -10,8 +10,10 @@ source("station_meta.R")
 source("read_functions.R")
 source("ingestion.R")
 source("qc.R")
+VERSION <- "V001"
 
-# todo: split wind into interval and sample
+# todo: do interval stats e.g. t_min, t_max
+# todo: add wind gust stats if available 
 DATA_ROOT_DIR = "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
 qc_config <- yaml::read_yaml("qc_config.yml")
 
@@ -57,8 +59,9 @@ for (i in 2:length(date_seq)) {
     # Cut to the given interval
     dat_qc <- dat_qc %>%
       dplyr::filter(between(timestamp, start_date, as.POSIXct(end_date, tz = "UTC") - 0.1))
+    if (is.null(dat_qc) || nrow(dat_qc) == 0) next
     # output one file per date interval and per instrument
-    out_dir <- file.path(qc_config$out_file$out_dir, inst_name, serial)
+    out_dir <- file.path(qc_config$out_file$out_dir, VERSION, inst_name, serial)
     dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
     out_file <- file.path(out_dir, paste0(inst$type, "_", inst$serial, "_", start_date, "_", end_date, ".csv"))
     print(out_file)
