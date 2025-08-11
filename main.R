@@ -10,15 +10,11 @@ source("station_meta.R")
 source("read_functions.R")
 source("ingestion.R")
 source("qc.R")
-VERSION <- "V001"
-
-# todo: do interval stats e.g. t_min, t_max
-# todo: add wind gust stats if available 
-DATA_ROOT_DIR = "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
+VERSION <- "V002"
+DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
+DATA_ROOT_DIR <- "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
 qc_config <- yaml::read_yaml("qc_config.yml")
 
-# todo: add flexible file_pattern_strings list for each e.g. 
-# "RAW/by-castle_no_sn/davis_weewx/{castle_no_sn}/raw_loop/Davis_%Y%m%d_??.dat"
 # currently placeholder
 # Define your list of instruments and their serial numbers
 instruments <- list(
@@ -35,13 +31,12 @@ date_seq <- seq.Date(as.Date(qc_config$dates$start_date), as.Date(qc_config$date
 for (i in 2:length(date_seq)) {
   start_date <- date_seq[i - 1]
   end_date  <- date_seq[i]
-  print(paste(start_date, "->", end_date))
+  print(paste(start_date, "->", end_date, "..."))
   for (inst in instruments) {
     inst_name <- inst$type
     serial <- inst$serial
     # Read and standardise the data for this instrument/serial
-    # read in +- 1 days then trim after. 
-    
+    # read in +- 1 days then trim after (inefficient but will catch all required data)
     dat <- standardise_station(
       station_meta[[inst_name]],
       DATA_ROOT_DIR,

@@ -6,18 +6,30 @@ qc_limits:
     min: 0
     max: 110
   Tair (degC):
-    min: -20
+    min: -40
     max: 60
   press (hPa):
-    min: 900
+    min: 800 
     max: 1100
   rain (mm h-1):
     min: 0
     max: 500
-  wdir (deg):
+  wdir min (deg):
     min: 0
     max: 360
-  ws (m s-1):
+  wdir avg (deg):
+    min: 0
+    max: 360
+  wdir max (deg):
+    min: 0
+    max: 360
+  ws min (m s-1):
+    min: 0
+    max: 70
+  ws avg (m s-1):
+    min: 0
+    max: 70
+  ws max (m s-1):
     min: 0
     max: 70
 out_file:
