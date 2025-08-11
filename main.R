@@ -42,7 +42,7 @@ instruments <- list(
 )
 
 # Define the period of interest
-date_seq <- seq.Date(as.Date(qc_config$dates$start_date), as.Date(qc_config$dates$end_date), by = qc_config$out_file$length_days)
+date_seq <- seq.Date(start_date, end_date, by = qc_config$out_file$length_days)
 
 for (i in 2:length(date_seq)) {
   start_date <- date_seq[i - 1]
