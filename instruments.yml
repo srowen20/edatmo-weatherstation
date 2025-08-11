@@ -1,0 +1,13 @@
+instruments:
+  - type: davis_weewx
+    serial: castle_no_sn
+    file_pattern_strings: null
+  - type: wxt536_jcmb
+    serial: "1540027"
+    file_pattern_strings: null
+  - type: davis_iot
+    serial: jcmb-weather-01
+    file_pattern_strings: null
+  - type: wxt536_serial
+    serial: S0230710
+    file_pattern_strings: null
