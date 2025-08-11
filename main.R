@@ -10,7 +10,7 @@ source("station_meta.R")
 source("read_functions.R")
 source("ingestion.R")
 source("qc.R")
-VERSION <- "V008"
+VERSION <- "V009"
 DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
 # DATA_ROOT_DIR <- "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
 qc_config <- yaml::read_yaml("qc_config.yml")
