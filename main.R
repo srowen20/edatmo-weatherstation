@@ -10,7 +10,25 @@ source("station_meta.R")
 source("read_functions.R")
 source("ingestion.R")
 source("qc.R")
-VERSION <- "V009"
+VERSION <- "V010"
+
+args <- commandArgs(trailingOnly = TRUE)
+
+if (length(args) >= 1) {
+  DATA_ROOT_DIR <- args[[1]]
+} else {
+  DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
+}
+if (DATA_ROOT_DIR == "" || is.null(DATA_ROOT_DIR)) {
+  stop("DATA_ROOT_DIR must be set as the first command line argument or the DATA_ROOT_DIR environment variable.")
+}
+if (length(args) >= 2) {
+  start_date <- as.Date(args[[2]])
+  end_date <- as.Date(args[[3]])
+} else {
+  start_date <- as.Date(qc_config$dates$start_date)
+  end_date <- as.Date(qc_config$dates$end_date)
+}
 DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
 # DATA_ROOT_DIR <- "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
 qc_config <- yaml::read_yaml("qc_config.yml")
