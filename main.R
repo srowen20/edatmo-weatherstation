@@ -13,19 +13,32 @@ source("qc.R")
 VERSION <- "V007"
 args <- commandArgs(trailingOnly = TRUE)
 
+# DATA_ROOT_DIR
 if (length(args) >= 1) {
   DATA_ROOT_DIR <- args[[1]]
 } else {
   DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
 }
+if (DATA_ROOT_DIR == "" || is.null(DATA_ROOT_DIR)) {
+  stop("DATA_ROOT_DIR must be set as the first command line argument or the DATA_ROOT_DIR environment variable.")
+}
+
 qc_config <- yaml::read_yaml("qc_config.yml")
 
-# currently placeholder
-# Define your list of instruments and their serial numbers
-instruments <- yaml::read_yaml("instruments.yml")$instruments
+# Start and end date from args if provided
+if (length(args) >= 2) {
+  start_date <- as.Date(args[[2]])
+} else {
+  start_date <- as.Date(qc_config$dates$start_date)
+}
+if (length(args) >= 3) {
+  end_date <- as.Date(args[[3]])
+} else {
+  end_date <- as.Date(qc_config$dates$end_date)
+}
 
 # Define the period of interest
-date_seq <- seq.Date(as.Date(qc_config$dates$start_date), as.Date(qc_config$dates$end_date), by = qc_config$out_file$length_days)
+date_seq <- seq.Date(start_date, end_date, by = qc_config$out_file$length_days)
 
 for (i in 2:length(date_seq)) {
   start_date <- date_seq[i - 1]
