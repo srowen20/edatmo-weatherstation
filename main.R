@@ -13,11 +13,13 @@ source("qc.R")
 VERSION <- "V010"
 
 args <- commandArgs(trailingOnly = TRUE)
+qc_config <- yaml::read_yaml("qc_config.yml")
 
 if (length(args) >= 1) {
   DATA_ROOT_DIR <- args[[1]]
 } else {
   DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
+  # DATA_ROOT_DIR <- "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
 }
 if (DATA_ROOT_DIR == "" || is.null(DATA_ROOT_DIR)) {
   stop("DATA_ROOT_DIR must be set as the first command line argument or the DATA_ROOT_DIR environment variable.")
@@ -29,11 +31,7 @@ if (length(args) >= 2) {
   start_date <- as.Date(qc_config$dates$start_date)
   end_date <- as.Date(qc_config$dates$end_date)
 }
-DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
-# DATA_ROOT_DIR <- "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
-qc_config <- yaml::read_yaml("qc_config.yml")
 
-# currently placeholder
 # Define your list of instruments and their serial numbers
 instruments <- list(
   list(type = "davis_weewx", serial = "castle_no_sn", file_pattern_strings = NA),
