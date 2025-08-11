@@ -9,9 +9,9 @@ station_meta <- list(
       "outsideTemperature" = "Tair (degC)", 
       "pressure" = "press (hPa)",
       "rainRate" = "rain (mm h-1)",
-      "solarRadiation" = "GHI",
-      "windDirection" = "wdir (deg)",
-      "windSpeed" = "ws (m s-1)"
+      "solarRadiation" = "GHI (W m-2)",
+      "windDirection" = "wdir sample (deg)",
+      "windSpeed" = "ws sample (m s-1)"
     )
   ),
   "davis_weewx" = list(
@@ -21,26 +21,35 @@ station_meta <- list(
       "outTemp" = "Tair (degC)", 
       "pressure" = "press (hPa)",
       "rainRate" = "rain (mm h-1)",            
-      "windDir" = "wdir (deg)",
-      "windSpeed" = "ws (m s-1)"
+      "windDir" = "wdir sample (deg)",
+      "windSpeed" = "ws sample (m s-1)"
     )
   ),
   "wxt536_serial" = list(
     read_func = read_wxt536_serial,
     varmap = c(
-      "Dm" = "wdir (deg)",
-      "Sm" = "ws (m s-1)",
-      "Pa" = "press (hPa)",
+      "Dn" = "wdir min (deg)",
+      "Dm" = "wdir avg (deg)",
+      "Dx" = "wdir max (deg)",
+      "Sn" = "ws min (m s-1)",
+      "Sm" = "ws avg (m s-1)",
+      "Sx" = "ws max (m s-1)",
       "Ta" = "Tair (degC)",
       "Ua" = "RH (%)",
+      "Pa" = "press (hPa)",
       "Ri" = "rain (mm h-1)"
     )
   ),
+  
   "wxt536_jcmb" = list(
     read_func = read_WXT536_jcmb,
     varmap = c(
-      "Wind.Dir.Ave" = "wdir (deg)",
-      "Wind.Speed.Ave" = "ws (m s-1)",
+      "Wind.Dir.Min" = "wdir min (deg)",
+      "Wind.Dir.Max" = "wdir max (deg)",
+      "Wind.Dir.avg" = "wdir avg (deg)",
+      "Wind.Speed.Min" = "ws min (m s-1)",
+      "Wind.Speed.Max" = "ws max (m s-1)",
+      "Wind.Speed.avg" = "ws avg (m s-1)",
       "Air.Pressure" = "press (hPa)",
       "Air.Temp" = "Tair (degC)",
       "Humidity" = "RH (%)",

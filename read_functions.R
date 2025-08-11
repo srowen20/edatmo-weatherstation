@@ -3,6 +3,7 @@ library(purrr)
 # Each function accepts DIR, serial, start_date, end_date, file_pattern_strings
 # Date inputs: POSIXct or Date
 
+# todo: implement file_pattern_strings for all
 read_davis_iot <- function(DATA_ROOT_DIR, serial, start_date, end_date, file_pattern_strings) {
   
   base_dir <- file.path(DATA_ROOT_DIR, "RAW/by-serial/davis-elastic", serial)
@@ -28,7 +29,6 @@ read_davis_iot <- function(DATA_ROOT_DIR, serial, start_date, end_date, file_pat
   data <- data %>% 
     filter(timestamp >= start_date & timestamp <= end_date) %>% 
     select(-c(barTrend, undefined, dayET, forecastIcons, uv), everything())
-  
   pivot_longer(
     data,
     cols = -timestamp,

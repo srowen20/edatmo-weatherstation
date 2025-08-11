@@ -22,7 +22,7 @@ qc_config <- yaml::read_yaml("qc_config.yml")
 # currently placeholder
 # Define your list of instruments and their serial numbers
 instruments <- list(
-  # list(type = "davis_weewx", serial = "castle_no_sn", file_pattern_strings = NA),
+  list(type = "davis_weewx", serial = "castle_no_sn", file_pattern_strings = NA),
   list(type = "wxt536_jcmb", serial = "1540027", file_pattern_strings = NA),
   list(type = "davis_iot", serial = "jcmb-weather-01", file_pattern_strings = NA),
   list(type = "wxt536_serial", serial = "S0230710", file_pattern_strings = NA)
