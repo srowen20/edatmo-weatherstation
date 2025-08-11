@@ -11,8 +11,13 @@ source("read_functions.R")
 source("ingestion.R")
 source("qc.R")
 VERSION <- "V007"
-DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
-#DATA_ROOT_DIR <- "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
+args <- commandArgs(trailingOnly = TRUE)
+
+if (length(args) >= 1) {
+  DATA_ROOT_DIR <- args[[1]]
+} else {
+  DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
+}
 qc_config <- yaml::read_yaml("qc_config.yml")
 
 # currently placeholder
