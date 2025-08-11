@@ -12,7 +12,7 @@ source("ingestion.R")
 source("qc.R")
 VERSION <- "V007"
 DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
-DATA_ROOT_DIR <- "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
+#DATA_ROOT_DIR <- "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
 qc_config <- yaml::read_yaml("qc_config.yml")
 
 # currently placeholder
@@ -53,7 +53,7 @@ for (i in 2:length(date_seq)) {
     # output one file per date interval and per instrument
     out_dir <- file.path(qc_config$out_file$out_dir, VERSION, inst_name, serial)
     dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-    out_file <- file.path(out_dir, paste0(inst$type, "_", inst$serial, "_", start_date, "_", end_date, "_", qc_config$dates$agg_interval, "_", VERSION, ".csv"))
+    out_file <- file.path(out_dir, paste0(inst$type, "_", inst$serial, "_", start_date, "_", end_date, "_", gsub(" ", "", qc_config$dates$agg_interval), "_", VERSION, ".csv"))
     print(out_file)
     dat_qc$timestamp <- format(dat_qc$timestamp, "%Y-%m-%d %H:%M:%S")
     write.csv(dat_qc, out_file, row.names = FALSE, quote = TRUE)
