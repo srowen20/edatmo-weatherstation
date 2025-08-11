@@ -14,7 +14,7 @@ VERSION <- "V010"
 
 args <- commandArgs(trailingOnly = TRUE)
 qc_config <- yaml::read_yaml("qc_config.yml")
-
+print(args)
 if (length(args) >= 1) {
   DATA_ROOT_DIR <- args[[1]]
 } else {
