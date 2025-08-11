@@ -1,0 +1,48 @@
+qc_limits:
+  GHI:
+    min: 0
+    max: 1300
+  RH (%):
+    min: 0
+    max: 110
+  Tair (degC):
+    min: -40
+    max: 60
+  press (hPa):
+    min: 800 
+    max: 1100
+  rain (mm h-1):
+    min: 0
+    max: 500
+  wdir min (deg):
+    min: 0
+    max: 360
+  wdir avg (deg):
+    min: 0
+    max: 360
+  wdir max (deg):
+    min: 0
+    max: 360
+  ws min (m s-1):
+    min: 0
+    max: 70
+  ws avg (m s-1):
+    min: 0
+    max: 70
+  ws max (m s-1):
+    min: 0
+    max: 70
+  ws sample (m s-1):
+    min: 0
+    max: 70
+  wdir sample (deg):
+    min: 0
+    max: 360    
+out_file:
+  length_days: 1
+  out_dir: "C:/Users/willm/Desktop/OUTPUT/"
+dates:
+  start_date: 2025-05-01
+  end_date: 2025-08-08
+  agg_interval: "10 min"
+  
