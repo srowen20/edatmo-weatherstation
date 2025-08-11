@@ -46,10 +46,10 @@ station_meta <- list(
     varmap = c(
       "Wind.Dir.Min" = "wdir min (deg)",
       "Wind.Dir.Max" = "wdir max (deg)",
-      "Wind.Dir.avg" = "wdir avg (deg)",
+      "Wind.Dir.Ave" = "wdir avg (deg)",
       "Wind.Speed.Min" = "ws min (m s-1)",
       "Wind.Speed.Max" = "ws max (m s-1)",
-      "Wind.Speed.avg" = "ws avg (m s-1)",
+      "Wind.Speed.Ave" = "ws avg (m s-1)",
       "Air.Pressure" = "press (hPa)",
       "Air.Temp" = "Tair (degC)",
       "Humidity" = "RH (%)",

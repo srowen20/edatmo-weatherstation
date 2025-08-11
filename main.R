@@ -10,7 +10,7 @@ source("station_meta.R")
 source("read_functions.R")
 source("ingestion.R")
 source("qc.R")
-VERSION <- "V002"
+VERSION <- "V007"
 DATA_ROOT_DIR <- Sys.getenv("DATA_ROOT_DIR")
 DATA_ROOT_DIR <- "C:/Users/willm/OneDrive - University of Edinburgh/UoE/data-root/"
 qc_config <- yaml::read_yaml("qc_config.yml")
@@ -35,7 +35,8 @@ for (i in 2:length(date_seq)) {
   for (inst in instruments) {
     inst_name <- inst$type
     serial <- inst$serial
-    # Read and standardise the data for this instrument/serial
+    
+      # Read and standardise the data for this instrument/serial
     # read in +- 1 days then trim after (inefficient but will catch all required data)
     dat <- standardise_station(
       station_meta[[inst_name]],
@@ -47,7 +48,7 @@ for (i in 2:length(date_seq)) {
     
     if (is.null(dat) || nrow(dat) == 0) next
     # Aggregate data (adjust time window if needed)
-    dat_agg <- agg_time(dat, start_date, end_date)
+    dat_agg <- agg_time(dat, start_date, end_date, agg_interval = qc_config$dates$agg_interval)
     if (is.null(dat_agg) || nrow(dat_agg) == 0) next
     # Apply quality control
     dat_qc <- simple_qc(dat_agg, qc_config$qc_limits)
@@ -58,7 +59,7 @@ for (i in 2:length(date_seq)) {
     # output one file per date interval and per instrument
     out_dir <- file.path(qc_config$out_file$out_dir, VERSION, inst_name, serial)
     dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-    out_file <- file.path(out_dir, paste0(inst$type, "_", inst$serial, "_", start_date, "_", end_date, ".csv"))
+    out_file <- file.path(out_dir, paste0(inst$type, "_", inst$serial, "_", start_date, "_", end_date, "_", qc_config$dates$agg_interval, "_", VERSION, ".csv"))
     print(out_file)
     dat_qc$timestamp <- format(dat_qc$timestamp, "%Y-%m-%d %H:%M:%S")
     write.csv(dat_qc, out_file, row.names = FALSE, quote = TRUE)

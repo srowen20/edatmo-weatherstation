@@ -32,9 +32,17 @@ qc_limits:
   ws max (m s-1):
     min: 0
     max: 70
+  ws sample (m s-1):
+    min: 0
+    max: 70
+  wdir sample (deg):
+    min: 0
+    max: 360    
 out_file:
   length_days: 1
   out_dir: "C:/Users/willm/Desktop/OUTPUT/"
 dates:
   start_date: 2025-05-01
   end_date: 2025-08-08
+  agg_interval: "10 min"
+  
