@@ -40,9 +40,9 @@ qc_limits:
     max: 360    
 out_file:
   length_days: 1
-  out_dir: "C:/Users/willm/Desktop/OUTPUT/"
+  out_dir: "/exports/geos.ed.ac.uk/palmer_group/managed/s3033739/edatmo/sowen/data-root/L1/by-product/edatmo-weatherstation"
 dates:
-  start_date: 2025-05-01
+  start_date: 2025-01-01
   end_date: 2025-08-08
-  agg_interval: "10 min"
+  agg_interval: "5 min"
   
