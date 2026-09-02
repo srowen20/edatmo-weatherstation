@@ -8,7 +8,8 @@ read_davis_iot <- function(DATA_ROOT_DIR, serial, start_date, end_date, file_pat
   
   base_dir <- file.path(DATA_ROOT_DIR, "RAW/by-serial/davis-elastic", serial)
   files <- list.files(base_dir, pattern = "\\.csv$", full.names = TRUE)
-  
+  if (length(files) == 0) return(NULL)
+
   # For each file, extract the start and end date (format: YYYYMMDD_YYYYMMDD)
   get_range <- function(f) {
     m <- str_match(basename(f), "(\\d{8})_(\\d{8})_.*\\.csv$")
